@@ -1,0 +1,4 @@
+.*
+!.gitignore
+*.FCStd*
+!rk6006-enclosure-lnk.FCStd
