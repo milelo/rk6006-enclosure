@@ -19,7 +19,6 @@ I haven't found a way to render PDF inline.
 -->
 
 ## Components
-1. Red + Black 4mm Binding Post 10A
 
 1. Red + Black 4mm Binding Post 10A
 1. RIDEN® RK6006/RK6006-BT 60V 6A Power Supply Buck Converter
