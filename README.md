@@ -18,51 +18,85 @@ I haven't found a way to render PDF inline.
 <img src="rk6006-enclosure-cuts.svg" width="600" title="rk6006 enclosure cuts">
 -->
 
-## Components
+## Key Features
+
+* The [RK6006] needs a minimum supply voltage of 12V with which its maximum output voltage will be **9.9V** (from the RK6006 specification: `^Vo = Vi / 1.1 - 1`).
+* Typical, reasonably powered PD adaptors can supply 20V giving a maximum output of **17.1V**.
+The [RK6006] displays its input voltage, see the photo.
+* The [RK6006] maximum output current is 6A. This is **not** limited by the maximum current output of the PD charger, rather the chargers **power rating**. This is a characteristic of the Buck Converter. See the "Maximum output power section below". A 67W charger should be able to provide 6A up to an output voltage of ~9.5V.
+* The [PD3.1] Power-Delivery Decoy module I use to feed the RK6006 selects the maximum power configuration of your PD Power adaptor. The module implements the PD3.1 standard, supporting higher power with charger voltages of 28V and possibly 36V and 48V (to be confirmed). Also 5A current with a suitable USB-C cable. I don't currently have anything to test this with.
+* Standard USB-C cables support 3A.
+* 5A USB-C cables contain an [E-Mark] chip to negotiate their capability.
+* The Fan isn't enabled while the output current < 3.9A and System temperature < 40℃. The RK6006 displays its system temperature. I've run the unit with continuous 6A output at lower voltages and the unit remained cool. If you want to test the fan just ensure the output if off with an output current limit of > 4A, short the output terminals and switch the unit on.
+
+## Maximum output power
+
+* From the RK6006 specification the its maximum output voltage is `^Vo = Vi / 1.1 - 1`. For a 20V adaptor this is `20V/1.1 + 1 = 17.1V`. In reality it may be higher under low load conditions. I've measured 18.7V.
+* Although the RK6006 can potentially draw more current from an adaptor than the adaptor is rated at, to support USB 3.0 specification the PD devices must implement an "over-current limiting mechanism" that is "resettable without user mechanical intervention" [^over-current-protection]. In reality power adaptors will typically supply power beyond their maximum rating.
+* If the PD adaptor cuts out, the RK6006 will temporarily lose power and will restart with its output in the off-state.
+* Running an adaptor beyond its rated power output may affect the products lifetime. See the tables below for the maximum output power you can draw to keep within the adaptors rating.
+* The RK6006 can be configured to limit its output power to that of a particular DP adaptor however unless you always use it with the same adaptor I've found this to be more cumbersome than helpful. Also if the output terminals are shorted with the output on (as opposed to shorting the output terminals and then switching the output on) then the current surge could still trip the PD protection before the RK6006 can react to enforce its current-limit.
+
+[^over-current-protection]: [For over-current protection, USB 3.0 Specification Section]
+11.4.1.1.1 states:
+The host and all self-powered hubs must implement over-current protection for safety reasons, and the hub must have a way to detect the over-current condition and report it to the USB software.
+The over-current limiting mechanism must be resettable without user mechanical intervention. Polymeric PTCs and solid-state switches are examples of methods that can be used for over-current limiting.
+
+### Adaptors supporting 20V Power Delivery
+
+* Typical, reasonably powered PD adaptors can supply 20V giving a maximum output voltage of **17.1V** (`20 / 1.1 + 1`).
+* This reduced output voltage is due to losses in the RK6006 that also reduces the output power that can be supplied by the RK6006. For a 20V charger multiply the adaptor power rating by **0.859** `(17.18V/20V)` to get the maximum output power.
+* The maximum output current of the RK6006 is 6A. This can be supplied up to an output voltage that doesn't cause the adaptors power rating to be exceeded (for 67W adaptor `57.5W/6 = 9.5V`) above which maximum current will trail off to the maximum adaptor current (`67W/20V` or `57.5/17.1V`). See the table.
+
+| Adaptor Power | Output power¹ | ^V @ 6A | Output power cut-out² | Note
+|---|---|---|---|---|
+| 100W | 85.9W | 14.3V || requires a 5A USB-C cable
+| 67W | 57.5W | 9.5V |
+| 65W | 55.8W | 9.3V |
+| 45W | 38.6W | 6.4V |
+| 30W | 25.8W | 4.3V | 31.3W |
+
+* 1 The maximum output power as displayed on the RK6006 to keep within the adaptors power rating.
+* 2 Measured cut-out output power from a sample adaptor. Note: this is the supplied power, the power drawn from the adaptor is higher.
+
+## Project Build
+
+### Components
 
 1. RIDEN® RK6006/RK6006-BT 60V 6A Power Supply Buck Converter. Here is the [RK6006 user manual] and a good review: [Kerry Wong RK6006 review].
 1. USB-C [PD3.1] Decoy Module - negotiates the maximum voltage and current output from a PD Power adaptor to supply the RK6006.
 1. Red + Black 4mm Binding Post 10A
 1. 3mm Perspex 300x200mm
 1. DC 5V 2Pin Cooling Fan 40x40x10mm
-1. 12 x M3 Coarse (0.5mm) 15mm black nylon pan-head screws
+1. 12 x M3 Coarse (0.5mm) 15mm black nylon pan-head screws - nylon screws can be easily cut to size with side cutters.
 1. 4 x M3 nylon washers - optional for the lid screws to cover the lid slots.
 1. Connecting wire. I have used insulated solid copper wire 1.5mm^2 for the input and 2.5mm^2 for the output from some house ring-main cable I had. This could be considered an over-kill and isn't critical however thinner the wire the more power loss and volt drop across the cable which could show up in the RK6006 meter readings at higher currents I'm not sure how significant the volt-drop is compared to internal volt-drops in the unit.
 1. USB-C power adaptor - Potentially any that can output at least 12V. I have a fairly inexpensive but compact and efficient 67W GAN-III unit - see the [BOM]
 
 For component details and potential suppliers see the [BOM]
 
-## Key Features
-
-* The [RK6006] needs a minimum supply voltage of 12V with which its maximum output voltage will be 9.9V (^Vo = Vi / 1.1 - 1).
-* Typical, reasonably powered PD adaptors can supply 20V giving a maximum output of 17V.
-* The [RK6006] displays its input voltage.
-* The [RK6006] maximum output current is 6A. This is not limited by the maximum current output of the PD charger, rather the chargers **power** rating. This is a characteristic of the Buck Converter. A 67W charger should be able to provide 6A up to an output voltage of ~11V (67W/6A) above which the maximum current will trail off to ~3.3A (67W/20V). Note the conversion efficiency of the [RK6006] isn't 100% so the actual values will be slightly less than this.
-* The [PD3.1] Power Delivery Decoy module I use to feed the RK6006 selects the maximum power configuration of your PD Power adaptor. The module implements the PD3.1 standard, supporting higher power with charger voltages of 28V and possibly 36V and 48V (to be confirmed). Also 5A current with a suitable USB-C cable. I don't currently have anything to test this with.
-* Standard USB-C cables must support 3A.
-* 5A USB-C cables contain an [E-Mark] chip to negotiate their capability.
-* Although the RK6006 can be set to put the connected Power Delivery adaptor into an over-current condition, to support USB 3.0 specification the PD devices must implement an "over-current limiting mechanism" that is "resettable without user mechanical intervention". See the reference below.
-* If the PD adaptor cuts out, the RK6006 will temporarily lose power and will restart with its output in the off-state.
-* The RK6006 can be configured to limit its output power to that of a particular DP adaptor however unless you will always use it with the same adaptor then this is likely to be more cumbersome than helpful. Also if the output terminals are shorted with the output on (as opposed to shorting the output terminals and then switching the output on) then the current surge may trip the PD protection before the RK6006 can react to enforce its current-limit.
-* The Fan isn't enabled while the output current < 3.9A and System temperature < 40℃. The RK6006 displays its system temperature. I've run the unit with continuous 6A output at lower voltages and the unit remained cool.
-
-## Required Tools
+### Required Tools
 
 1. Laser cutter for the 3mm cast-acrylic
 1. Acrylic line-bend heater - I made one with some nichrome wire and this power supply; more information to come.
 1. 90deg jig - Two perpendicular surfaces to set the 90deg bends against, preferably with a sharp inside radius at the butt off the surfaces. I used a metal book-end.
 1. Taper tap - M3 Coarse (0.5mm) - Required to cut the screw threads in the acrylic laser cut holes.
+1. Soldering iron and solder to connect the PD Decoy module and output terminals.
 
-## Bending guidelines
+### Bending guidelines
 
+1. I've used a bend radii in the design that I've found the heated acrylic naturally bends to, without being forced. The line heated acrylic can be picked up and bent to roughly 90deg then placed in the 90deg jig to set the bend angle.
+1. For some of the bends the un-bent parts of the material that fall on the bend-line will need protecting from the heat. If protection is only required on one side then the hot wire ends can be used. If both, either a heat shield will be required or the length of the heated wire reduced with a current shunt. see below
 1. ToDo...
 
-## Other notes
-### [For over-current protection, USB 3.0 Specification Section] 
-11.4.1.1.1 states:
-The host and all self-powered hubs must implement over-current protection for safety reasons, and the hub must have a way to detect the over-current condition and report it to the USB software. 
+#### heat shield
 
-The over-current limiting mechanism must be resettable without user mechanical intervention. Polymeric PTCs and solid-state switches are examples of methods that can be used for over-current limiting.
+#### current shunt
+
+## Wiring the module
+
+1. Note: the RK6006 terminal block can be unplugged from the unit, this greatly helps accessibility.
+1. ToDo...
 
 ## To-do
 
@@ -80,3 +114,9 @@ The over-current limiting mechanism must be resettable without user mechanical i
 [PD3.1]: https://www.graniteriverlabs.com/en-us/technical-blog/usb-power-delivery-specification-3-1
 [For over-current protection, USB 3.0 Specification Section]: https://www.littelfuse.com/~/media/electronics_technical/application_notes/usb/littelfuse_usb_3_0_circuit_protection_application_note.pdf 
 [Kerry Wong RK6006 review]: https://youtu.be/FeJ0dfOLvTA
+
+---
+
+This work is Copyright © 2023 Mike Longworth
+
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
